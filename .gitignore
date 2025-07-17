@@ -1,0 +1,74 @@
+
+
+
+# Android/IntelliJ specific
+*.iml
+.idea/
+.gradle/
+local.properties
+*.log
+
+# Keystore files
+*.jks
+*.keystore
+
+# Gradle build folders
+/build/
+**/build/
+
+# Kotlin specific
+*.class
+*.jar
+*.war
+*.ear
+
+# Caches
+.cache/
+.cxx/
+*.db
+*.db-journal
+
+# Android Studio 3.1+ automatically generates .signing files
+*.signing.properties
+
+# NDK
+obj/
+
+# Unit test reports
+/test-results/
+*.xml
+
+# Android Studio Captures
+captures/
+
+# Files for debugging
+*.hprof
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Coverage reports
+*.ec
+coverage/
+
+# Jetpack Compose
+*.swp
+
+# Fastlane metadata, if used
+fastlane/report.xml
+fastlane/metadata/android/*/*.txt
+
+# Crashlytics / Firebase
+fabric.properties
+crashlytics.properties
+
+# Google Services JSON
+google-services.json
