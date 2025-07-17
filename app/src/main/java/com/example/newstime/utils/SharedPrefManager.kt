@@ -2,8 +2,9 @@ package com.example.newstime.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
-object SharedPrefManager{
+object SharedPrefManager {
     private const val PREF_NAME = "newstime_pref"
     private const val KEY_TOKEN = "token"
     private const val KEY_USERNAME = "name"
@@ -12,23 +13,27 @@ object SharedPrefManager{
 
     private lateinit var prefs: SharedPreferences
 
-    fun init(context: Context){
-        prefs = context.getSharedPreferences(PREF_NAME, context.MODE_PRIVATE)
+    fun init(context: Context) {
+        prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
 
-    fun setToken(token: String){
-        prefs.edit().putString(token)
+    fun saveUser(name: String, email: String, token: String){
+        prefs.edit{
+            putString(KEY_TOKEN, token)
+            putString(KEY_USERNAME, name)
+            putString(KEY_EMAIL, email)
+        }
     }
 
-    fun getToken(){
-        return prefs.getString(KEY_TOKEN)
+    fun getToken(): String? {
+        return prefs.getString(KEY_TOKEN, null)
     }
 
-    fun saveInterests(interests: Set<String>){
-        prefs.edit().putStringSet(KEY_INTERESTS, interests)
+    fun saveInterests(interests: Set<String>) {
+        prefs.edit { putStringSet(KEY_INTERESTS, interests) }
     }
 
-    fun getInterests(){
-        return prefs.getStringSet(KEY_INTERESTS)
+    fun getInterests(): Set<String>? {
+        return prefs.getStringSet(KEY_INTERESTS, emptySet())
     }
 }

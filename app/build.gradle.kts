@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.preference)
     implementation(libs.common)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

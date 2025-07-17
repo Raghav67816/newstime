@@ -4,22 +4,22 @@ import android.util.Base64
 import android.content.Intent
 import com.example.newstime.utils.SharedPrefManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import org.json.JSONObject
 
-
-
-private lateinit var auth: FirebaseAuth
-
 class LoginActivity : AppCompatActivity() {
+
+    val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +31,6 @@ class LoginActivity : AppCompatActivity() {
             insets
         }
 
-        auth = FirebaseAuth.getInstance()
         SharedPrefManager.init(applicationContext)
 
 
@@ -54,6 +53,7 @@ class LoginActivity : AppCompatActivity() {
         val signupIntent = Intent(applicationContext, SignUpActivity::class.java)
         signupIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(signupIntent)
+        finish()
     }
 
     private fun loginUser(email: String, pass: String) {
@@ -67,12 +67,9 @@ class LoginActivity : AppCompatActivity() {
                                 val token = tokenTask.result?.token
                                 if (!token.isNullOrEmpty()) {
                                     storeInfo(token)
-
                                     Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
 
-                                    val intent = Intent(this, InterestActivity::class.java)
-                                    startActivity(intent)
-                                    finish()
+                                    validate_interests()
 
                                 } else {
                                     Toast.makeText(this, "Failed to retrieve token", Toast.LENGTH_SHORT).show()
@@ -97,22 +94,40 @@ class LoginActivity : AppCompatActivity() {
 
 
     private fun storeInfo(token: String){
-        val decoded_payload = decodePayload(token)
-        val userName = decoded_payload.getString("user_id")
-        val email = decoded_payload.getString("email")
+        val name = auth.currentUser?.displayName?:return
+        val email = auth.currentUser?.email?:return
 
-        SharedPrefManager.setToken(token)
+        if (name.isEmpty() || email.isEmpty()){
+            Toast.makeText(applicationContext, "Can't get name and email", Toast.LENGTH_SHORT).show()
+        }
+
+        else{
+            SharedPrefManager.saveUser(name, email, token)
+            Toast.makeText(applicationContext, "Logging in as $name", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    private fun decodePayload(token: String): JSONObject {
-        val parts = token.split(".")
-        if (parts.size != 3) throw IllegalArgumentException("Invalid JWT format")
+    private fun validate_interests(){
+        val userId = auth.currentUser?.uid?:return
+        if(!userId.isEmpty()){
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if(!documentSnapshot.exists() || !documentSnapshot.contains("interests")){
+                        val interests_intent = Intent(applicationContext, InterestActivity::class.java)
+                        startActivity(interests_intent)
+                        finish()
+                    }
 
-        val payload = parts[1]
-        val decodedBytes = Base64.decode(payload, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-        val decodedString = decodedBytes.toString(Charsets.UTF_8)
+                    else{
+                        val interests = documentSnapshot.get("interests")
+                        Toast.makeText(applicationContext, interests.toString(), Toast.LENGTH_SHORT).show()
+                    }
 
-        return JSONObject(decodedString)
+                }
+        }
+        else{
+            Log.d("NEWS_TIME", "failed at validate_interests $userId was empty.")
+        }
     }
 
 }
