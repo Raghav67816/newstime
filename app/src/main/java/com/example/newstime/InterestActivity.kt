@@ -69,7 +69,7 @@ class InterestActivity : AppCompatActivity() {
     }
 
     suspend fun get_interests(): Pair<Int, String> = withContext(Dispatchers.IO){
-        val request = Request.Builder().url("https://f90e639bebdb.ngrok-free.app/prefs").build()
+        val request = Request.Builder().url("https://8a700020e68f.ngrok-free.app/prefs").build()
         val response = httpClient.newCall(request).execute()
         val resData = response.body.string()
         response.close()
@@ -111,7 +111,7 @@ class InterestActivity : AppCompatActivity() {
         }
     }
 
-    private fun get_user_prefs(): MutableSet<String>{
+    private fun get_user_prefs(): String{
         val interests = mutableSetOf<String>()
         val chipsParent = findViewById<LinearLayout>(R.id.container)
         for (element in 0 until chipsParent.childCount){
@@ -122,6 +122,6 @@ class InterestActivity : AppCompatActivity() {
                 }
             }
         }
-        return interests
+        return interests.joinToString(",")
     }
 }

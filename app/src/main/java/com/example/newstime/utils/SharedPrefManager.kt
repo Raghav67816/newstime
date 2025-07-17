@@ -29,8 +29,8 @@ object SharedPrefManager {
         return prefs.getString(KEY_TOKEN, null)
     }
 
-    fun saveInterests(interests: Set<String>) {
-        prefs.edit { putStringSet(KEY_INTERESTS, interests) }
+    fun saveInterests(interests: String) {
+        prefs.edit { putString(KEY_INTERESTS, interests) }
     }
 
     fun getInterests(): Set<String>? {

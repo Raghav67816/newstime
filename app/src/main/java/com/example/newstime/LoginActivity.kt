@@ -2,6 +2,7 @@ package com.example.newstime
 
 import android.util.Base64
 import android.content.Intent
+import android.content.SharedPreferences
 import com.example.newstime.utils.SharedPrefManager
 import android.os.Bundle
 import android.util.Log
@@ -69,7 +70,7 @@ class LoginActivity : AppCompatActivity() {
                                     storeInfo(token)
                                     Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
 
-                                    validate_interests()
+                                    validateInterests()
 
                                 } else {
                                     Toast.makeText(this, "Failed to retrieve token", Toast.LENGTH_SHORT).show()
@@ -107,27 +108,32 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun validate_interests(){
-        val userId = auth.currentUser?.uid?:return
-        if(!userId.isEmpty()){
-            db.collection("users").document(userId).get()
-                .addOnSuccessListener { documentSnapshot ->
-                    if(!documentSnapshot.exists() || !documentSnapshot.contains("interests")){
-                        val interests_intent = Intent(applicationContext, InterestActivity::class.java)
-                        startActivity(interests_intent)
-                        finish()
-                    }
+    private fun validateInterests() {
+        val userId = auth.currentUser?.uid ?: return
 
-                    else{
-                        val interests = documentSnapshot.get("interests")
-                        Toast.makeText(applicationContext, interests.toString(), Toast.LENGTH_SHORT).show()
-                    }
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (!documentSnapshot.exists() || !documentSnapshot.contains("interests")) {
+                    val interestsIntent = Intent(this, InterestActivity::class.java)
+                    interestsIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(interestsIntent)
+                    finish()
+                } else {
+                    val interestsList = documentSnapshot.get("interests") as? List<*>
 
+                    if (!interestsList.isNullOrEmpty()) {
+                        val cleanedList = interestsList.filterIsInstance<String>()
+                        SharedPrefManager.saveInterests(cleanedList.joinToString(","))
+                        Toast.makeText(this, cleanedList.toString(), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Log.d("NEWS_TIME", "Interests field is empty or not a list of strings.")
+                    }
                 }
-        }
-        else{
-            Log.d("NEWS_TIME", "failed at validate_interests $userId was empty.")
-        }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("NEWS_TIME", "Failed to fetch user document: ", exception)
+            }
     }
+
 
 }
