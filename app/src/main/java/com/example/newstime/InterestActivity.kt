@@ -8,7 +8,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +15,7 @@ import com.example.newstime.utils.SharedPrefManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
@@ -42,9 +42,10 @@ class InterestActivity : AppCompatActivity() {
 
         val nextFloatingBtn = findViewById<FloatingActionButton>(R.id.nextBtn)
         nextFloatingBtn.setOnClickListener {
-            val user_interests = get_user_prefs()
+            val userInterests = getUserPrefs()
 
-            SharedPrefManager.saveInterests(user_interests)
+            SharedPrefManager.saveInterests(userInterests)
+            pushToDb(userInterests)
 
             val homeActivity = Intent(applicationContext, HomeActivity::class.java)
             homeActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -53,7 +54,7 @@ class InterestActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            val (code, data) = get_interests()
+            val (code, data) = getInterests()
             if (code != 200){
                 Toast.makeText(applicationContext, "Failed to get interests. $code", Toast.LENGTH_SHORT).show()
                 print(code)
@@ -61,14 +62,14 @@ class InterestActivity : AppCompatActivity() {
             else{
                 val gson = Gson()
                 val type = object: TypeToken<Map<String, List<String>>>() {}.type
-                val data_map: Map<String, List<String>> = gson.fromJson(data, type)
-                prepareView(data_map)
+                val dataMap: Map<String, List<String>> = gson.fromJson(data, type)
+                prepareView(dataMap)
                 Toast.makeText(applicationContext, "Fetched prefs", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    suspend fun get_interests(): Pair<Int, String> = withContext(Dispatchers.IO){
+    suspend fun getInterests(): Pair<Int, String> = withContext(Dispatchers.IO){
         val request = Request.Builder().url("https://8a700020e68f.ngrok-free.app/prefs").build()
         val response = httpClient.newCall(request).execute()
         val resData = response.body.string()
@@ -80,7 +81,7 @@ class InterestActivity : AppCompatActivity() {
         val container = findViewById<LinearLayout>(R.id.container)
 
         for ((category, tags) in data) {
-            val category_text = TextView(this).apply {
+            val categoryText = TextView(this).apply {
                 text = category
                 textSize = 14f
                 setTypeface(null, android.graphics.Typeface.NORMAL)
@@ -92,13 +93,13 @@ class InterestActivity : AppCompatActivity() {
                     setMargins(0, 10, 0, 0)
                 }
             }
-            container.addView(category_text)
+            container.addView(categoryText)
 
-            val chip_group = ChipGroup(this).apply {
+            val chipGroup = ChipGroup(this).apply {
                 isSingleLine = false
                 isSingleSelection = false
             }
-            container.addView(chip_group)
+            container.addView(chipGroup)
 
             for (tag in tags) {
                 val chip = Chip(this).apply {
@@ -106,12 +107,12 @@ class InterestActivity : AppCompatActivity() {
                     isCheckable = true
                     isClickable = true
                 }
-                chip_group.addView(chip)
+                chipGroup.addView(chip)
             }
         }
     }
 
-    private fun get_user_prefs(): String{
+    private fun getUserPrefs(): String{
         val interests = mutableSetOf<String>()
         val chipsParent = findViewById<LinearLayout>(R.id.container)
         for (element in 0 until chipsParent.childCount){
@@ -123,5 +124,17 @@ class InterestActivity : AppCompatActivity() {
             }
         }
         return interests.joinToString(",")
+    }
+
+    private fun pushToDb(interests: String){
+        val uid = SharedPrefManager.getUid()
+        if(!uid.isNullOrEmpty()){
+            val db = FirebaseDatabase.getInstance().getReference("Users")
+            val data = mapOf(
+                "uid" to uid,
+                "interests" to interests
+            )
+            db.child(uid).setValue(data)
+        }
     }
 }

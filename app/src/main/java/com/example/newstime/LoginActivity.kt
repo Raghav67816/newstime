@@ -108,32 +108,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun validateInterests() {
-        val userId = auth.currentUser?.uid ?: return
-
-        db.collection("users").document(userId).get()
-            .addOnSuccessListener { documentSnapshot ->
-                if (!documentSnapshot.exists() || !documentSnapshot.contains("interests")) {
-                    val interestsIntent = Intent(this, InterestActivity::class.java)
-                    interestsIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(interestsIntent)
-                    finish()
-                } else {
-                    val interestsList = documentSnapshot.get("interests") as? List<*>
-
-                    if (!interestsList.isNullOrEmpty()) {
-                        val cleanedList = interestsList.filterIsInstance<String>()
-                        SharedPrefManager.saveInterests(cleanedList.joinToString(","))
-                        Toast.makeText(this, cleanedList.toString(), Toast.LENGTH_SHORT).show()
-                    } else {
-                        Log.d("NEWS_TIME", "Interests field is empty or not a list of strings.")
-                    }
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("NEWS_TIME", "Failed to fetch user document: ", exception)
-            }
-    }
-
+    private fun validateInterests() {}
 
 }

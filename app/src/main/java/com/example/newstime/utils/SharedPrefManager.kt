@@ -7,6 +7,7 @@ import androidx.core.content.edit
 object SharedPrefManager {
     private const val PREF_NAME = "newstime_pref"
     private const val KEY_TOKEN = "token"
+    private const val KEY_UID = "uid"
     private const val KEY_USERNAME = "name"
     private const val KEY_EMAIL = "email"
     private const val KEY_INTERESTS = "interests"
@@ -35,5 +36,13 @@ object SharedPrefManager {
 
     fun getInterests(): Set<String>? {
         return prefs.getStringSet(KEY_INTERESTS, emptySet())
+    }
+
+    fun saveUid(uid: String){
+        prefs.edit{ putString(KEY_UID, null) }
+    }
+
+    fun getUid(): String?{
+        return prefs.getString(KEY_UID, null)
     }
 }

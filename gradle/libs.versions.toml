@@ -23,6 +23,8 @@ kotlinx-serialization = "2.2.0"
 preference = "1.2.1"
 common = "18.11.0"
 firebaseFirestoreKtx = "25.1.4"
+firebaseDatabase = "21.0.0"
+googleFirebaseAppdistribution = "5.1.1"
 
 [libraries]
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
@@ -54,6 +56,7 @@ googleid = { group = "com.google.android.libraries.identity.googleid", name = "g
 androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
 common = { group = "com.google.mlkit", name = "common", version.ref = "common" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 
 [plugins]
 
@@ -61,4 +64,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "googleFirebaseAppdistribution" }
 

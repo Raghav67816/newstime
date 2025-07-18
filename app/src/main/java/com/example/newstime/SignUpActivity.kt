@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.node.InteroperableComposeUiNode
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.newstime.utils.SharedPrefManager
 import com.google.firebase.auth.FirebaseAuth
 
 private lateinit var auth: FirebaseAuth
@@ -62,6 +63,16 @@ class SignUpActivity : AppCompatActivity() {
                     .addOnCompleteListener (this) {task ->
                         if(task.isSuccessful){
                             Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show()
+                            val currentUser = auth.currentUser?.uid
+
+                            if (currentUser.toString().isEmpty() || currentUser == null){
+                                Toast.makeText(applicationContext, "Failed to store", Toast.LENGTH_SHORT).show()
+                            }
+                            else{
+                                SharedPrefManager.saveUid(currentUser)
+                                directLogin(email, pass)
+                                Toast.makeText(applicationContext, "Got the uid", Toast.LENGTH_SHORT).show()
+                            }
                         }
                         else{
                             Toast.makeText(this, "Failed To Create Account", Toast.LENGTH_SHORT).show()
@@ -72,6 +83,23 @@ class SignUpActivity : AppCompatActivity() {
 
         catch (e: Exception){
             print(e.message)
+        }
+    }
+
+    private fun directLogin(email: String, password: String){
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            if(task.isSuccessful){
+                val name = auth.currentUser?.displayName.toString()
+                val email = auth.currentUser?.email.toString()
+                auth.currentUser?.getIdToken(false)?.addOnCompleteListener { task ->
+                    if(task.isSuccessful){
+                        SharedPrefManager.saveUser(name, email, task.result?.token.toString())
+                        val homeActivity = Intent(applicationContext, HomeActivity::class.java)
+                        startActivity(homeActivity)
+                        finish()
+                    }
+                }
+            }
         }
     }
 }
