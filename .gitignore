@@ -73,3 +73,24 @@ crashlytics.properties
 # Google Services JSON
 google-services.json
 app/firebase_config.json
+
+# Ignore Firebase keys or configs
+firebase_config.json
+app/google-services.json
+
+# Ignore all drawables under a custom folder
+app/src/main/res/drawable-dev-only/
+
+# But keep layout XMLs
+!app/src/main/res/layout/*.xml
+
+# Ignore raw assets or temp files
+app/src/main/res/raw/
+*.bak
+*.tmp
+
+# Ignore IDE & build artifacts
+.gradle/
+.idea/
+*.iml
+build/
