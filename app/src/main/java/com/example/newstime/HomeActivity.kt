@@ -23,8 +23,8 @@ class HomeActivity : AppCompatActivity() {
             insets
         }
 
-        val api_key = "pub_94e0bc504a274c75aeaff2adb3badbfc"
-        val fetcher = NewsFetcher(api_key)
+        val apiKey = "pub_94e0bc504a274c75aeaff2adb3badbfc"
+        val fetcher = NewsFetcher(apiKey)
 
         val sharedPref = getSharedPreferences(
             "interests",
@@ -42,7 +42,7 @@ class HomeActivity : AppCompatActivity() {
 //
 //                if(!articles.isEmpty()){
 //                    runOnUiThread {
-//                        Toast.makeText(applicationContext, "We bought oursleves here.", Toast.LENGTH_SHORT).show()
+//                        Toast.makeText(applicationContext, "We bought ourselves here.", Toast.LENGTH_SHORT).show()
 //                    }
 //                }
 //                else{
@@ -56,13 +56,13 @@ class HomeActivity : AppCompatActivity() {
 }
 
 
-class NewsFetcher(api_key: String){
+class NewsFetcher(apiKey: String){
     val httpClient = OkHttpClient()
     val gson = Gson()
 
-    val url = "https://newsdata.io/api/1/news?apikey=${api_key}"
+    val url = "https://newsdata.io/api/1/news?apikey=${apiKey}"
 
-    suspend fun fetchArticles(category: String): List<NewsArticle>{
+    fun fetchArticles(category: String): List<NewsArticle>{
         val request = Request.Builder()
             .url(url)
             .build()
@@ -71,17 +71,17 @@ class NewsFetcher(api_key: String){
             val response = httpClient.newCall(request).execute()
             if(response.isSuccessful){
                 val body = response.body.string()
-                val news_data = gson.fromJson(body, ApiResponse::class.java)
-                news_data.articles
+                val newsData = gson.fromJson(body, ApiResponse::class.java)
+                newsData.articles
             }
             else{
-                emptyList<NewsArticle>()
+                emptyList()
             }
         }
 
         catch (e: Exception){
             print(e.toString())
-            emptyList<NewsArticle>()
+            emptyList()
         }
     }
 }
@@ -94,9 +94,9 @@ data class ApiResponse(
 data class NewsArticle(
     val title: String,
     val link: String,
-    val image_url: String?,
+    val imageUrl: String?,
     val pubDate: String,
-    val source_id: String,
+    val sourceId: String,
     val creator: List<String>?,
     val content: String?
 )

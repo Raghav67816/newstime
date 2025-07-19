@@ -2,16 +2,14 @@ package com.example.newstime
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.newstime.utils.SharedPrefManager
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 class SplashActivity : AppCompatActivity() {
     private var isChecking = true
@@ -23,6 +21,7 @@ class SplashActivity : AppCompatActivity() {
 
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition { isChecking }
+        SharedPrefManager.init(applicationContext)
 
         lifecycleScope.launch {
             checkIfLoggedIn()
@@ -35,41 +34,19 @@ class SplashActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun checkIfLoggedIn() {
-        val sharedPref = getSharedPreferences("LoginDetails", MODE_PRIVATE)
-        val token = sharedPref.getString("token", null)
-        if (token == null || !isValid(token)) {
+    private fun checkIfLoggedIn() {
+        val token = SharedPrefManager.getToken()
+        if (token == null || token.isEmpty()){
+            val loginActivity = Intent(applicationContext, LoginActivity::class.java)
             isChecking = false
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivity(loginActivity)
             finish()
-        } else {
-
-            val payload = try {
-                decodePayload(token)
-            } catch (e: Exception) {
-                null
-            }
-
-            isChecking = false
         }
-    }
 
-    private fun isValid(token: String): Boolean {
-        return try {
-            val payload = decodePayload(token)
-            val exp = payload.optLong("exp", 0L) * 1000
-            System.currentTimeMillis() < exp
-        } catch (e: Exception) {
-            false
+        else{
+            val homeActivity = Intent(applicationContext, HomeActivity::class.java)
+            startActivity(homeActivity)
+            finish()
         }
-    }
-
-    private fun decodePayload(token: String): JSONObject {
-        val parts = token.split(".")
-        if (parts.size != 3) throw IllegalArgumentException("Invalid JWT format")
-        val decoder = java.util.Base64.getUrlDecoder()
-        val decodedBytes = decoder.decode(parts[1])
-        val decodedString = String(decodedBytes, Charsets.UTF_8)
-        return JSONObject(decodedString)
     }
 }

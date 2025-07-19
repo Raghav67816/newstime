@@ -2,16 +2,17 @@ package com.example.newstime
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.node.InteroperableComposeUiNode
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.newstime.utils.SharedPrefManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 
 private lateinit var auth: FirebaseAuth
 
@@ -64,6 +65,9 @@ class SignUpActivity : AppCompatActivity() {
                         if(task.isSuccessful){
                             Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show()
                             val currentUser = auth.currentUser?.uid
+                            val profileBuilder = UserProfileChangeRequest.Builder()
+                                .setDisplayName(name)
+                                .build()
 
                             if (currentUser.toString().isEmpty() || currentUser == null){
                                 Toast.makeText(applicationContext, "Failed to store", Toast.LENGTH_SHORT).show()
@@ -71,7 +75,6 @@ class SignUpActivity : AppCompatActivity() {
                             else{
                                 SharedPrefManager.saveUid(currentUser)
                                 directLogin(email, pass)
-                                Toast.makeText(applicationContext, "Got the uid", Toast.LENGTH_SHORT).show()
                             }
                         }
                         else{
@@ -94,9 +97,8 @@ class SignUpActivity : AppCompatActivity() {
                 auth.currentUser?.getIdToken(false)?.addOnCompleteListener { task ->
                     if(task.isSuccessful){
                         SharedPrefManager.saveUser(name, email, task.result?.token.toString())
-                        val homeActivity = Intent(applicationContext, HomeActivity::class.java)
-                        startActivity(homeActivity)
-                        finish()
+
+                        Log.d("NAME", "Name is: $name")
                     }
                 }
             }

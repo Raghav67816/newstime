@@ -1,26 +1,20 @@
 package com.example.newstime
 
-import android.util.Base64
 import android.content.Intent
-import android.content.SharedPreferences
-import com.example.newstime.utils.SharedPrefManager
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.newstime.utils.SharedPrefManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import org.json.JSONObject
 
 class LoginActivity : AppCompatActivity() {
 
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
