@@ -72,3 +72,4 @@ crashlytics.properties
 
 # Google Services JSON
 google-services.json
+app/firebase_config.json
