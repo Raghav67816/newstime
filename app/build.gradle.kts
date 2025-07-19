@@ -76,4 +76,5 @@ dependencies {
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.google.android.material:material:1.11.0")
+    implementation(platform("androidx.compose:compose-bom:2025.07.00"))
 }

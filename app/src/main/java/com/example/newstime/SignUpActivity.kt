@@ -64,18 +64,14 @@ class SignUpActivity : AppCompatActivity() {
                     .addOnCompleteListener (this) {task ->
                         if(task.isSuccessful){
                             Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show()
-                            val currentUser = auth.currentUser?.uid
                             val profileBuilder = UserProfileChangeRequest.Builder()
                                 .setDisplayName(name)
                                 .build()
 
-                            if (currentUser.toString().isEmpty() || currentUser == null){
-                                Toast.makeText(applicationContext, "Failed to store", Toast.LENGTH_SHORT).show()
-                            }
-                            else{
-                                SharedPrefManager.saveUid(currentUser)
-                                directLogin(email, pass)
-                            }
+                            directLogin(email, pass)
+                            val interestsActivity = Intent(applicationContext, InterestActivity::class.java)
+                            startActivity(interestsActivity)
+
                         }
                         else{
                             Toast.makeText(this, "Failed To Create Account", Toast.LENGTH_SHORT).show()
@@ -97,8 +93,6 @@ class SignUpActivity : AppCompatActivity() {
                 auth.currentUser?.getIdToken(false)?.addOnCompleteListener { task ->
                     if(task.isSuccessful){
                         SharedPrefManager.saveUser(name, email, task.result?.token.toString())
-
-                        Log.d("NAME", "Name is: $name")
                     }
                 }
             }

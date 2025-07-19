@@ -23,6 +23,7 @@ object SharedPrefManager {
             putString(KEY_TOKEN, token)
             putString(KEY_USERNAME, name)
             putString(KEY_EMAIL, email)
+
         }
     }
 
@@ -34,8 +35,8 @@ object SharedPrefManager {
         prefs.edit { putString(KEY_INTERESTS, interests) }
     }
 
-    fun getInterests(): Set<String>? {
-        return prefs.getStringSet(KEY_INTERESTS, emptySet())
+    fun getInterests(): String? {
+        return prefs.getString(KEY_INTERESTS, "")
     }
 
     fun saveUid(uid: String){
@@ -44,5 +45,13 @@ object SharedPrefManager {
 
     fun getUid(): String?{
         return prefs.getString(KEY_UID, null)
+    }
+
+    fun clearUser(){
+        prefs.edit {
+            remove(KEY_USERNAME)
+            remove(KEY_TOKEN)
+            remove(KEY_UID)
+        }
     }
 }

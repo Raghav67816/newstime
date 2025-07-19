@@ -2,6 +2,7 @@ package com.example.newstime
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -15,6 +16,7 @@ import com.example.newstime.utils.SharedPrefManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -24,9 +26,12 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
+private lateinit var auth: FirebaseAuth
+
 class InterestActivity : AppCompatActivity() {
 
     private val httpClient = OkHttpClient()
+    private var isViewReady = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,19 +43,27 @@ class InterestActivity : AppCompatActivity() {
             insets
         }
 
+        auth = FirebaseAuth.getInstance()
+
         SharedPrefManager.init(applicationContext)
 
         val nextFloatingBtn = findViewById<FloatingActionButton>(R.id.nextBtn)
         nextFloatingBtn.setOnClickListener {
-            val userInterests = getUserPrefs()
+            if(isViewReady){
+                val userInterests = getUserPrefs()
+                Log.d("INTERESTS", userInterests)
 
-            SharedPrefManager.saveInterests(userInterests)
-            pushToDb(userInterests)
+                SharedPrefManager.saveInterests(userInterests)
+                pushToDb(userInterests)
 
-            val homeActivity = Intent(applicationContext, HomeActivity::class.java)
-            homeActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(homeActivity)
-            finish()
+                val homeActivity = Intent(applicationContext, HomeActivity::class.java)
+                homeActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(homeActivity)
+                finish()
+            }
+            else{
+                Log.d("INTERESTS", "View is not ready")
+            }
         }
 
         lifecycleScope.launch {
@@ -70,7 +83,7 @@ class InterestActivity : AppCompatActivity() {
     }
 
     suspend fun getInterests(): Pair<Int, String> = withContext(Dispatchers.IO){
-        val request = Request.Builder().url("https://d0d50b5a397a.ngrok-free.app/prefs").build()
+        val request = Request.Builder().url("https://01d1ffce6f66.ngrok-free.app/prefs").build()
         val response = httpClient.newCall(request).execute()
         val resData = response.body.string()
         response.close()
@@ -110,28 +123,40 @@ class InterestActivity : AppCompatActivity() {
                 chipGroup.addView(chip)
             }
         }
+        isViewReady = true
     }
 
-    private fun getUserPrefs(): String{
+    private fun getUserPrefs(): String {
         val interests = mutableSetOf<String>()
         val chipsParent = findViewById<LinearLayout>(R.id.container)
-        for (element in 0 until chipsParent.childCount){
-            val chip = chipsParent.getChildAt(element)
-            if(chip is Chip){
-                if(chip.isChecked){
-                    interests.add(chip.text.toString())
+
+        for (i in 0 until chipsParent.childCount) {
+            val child = chipsParent.getChildAt(i)
+            if (child is ChipGroup) {
+                for (j in 0 until child.childCount) {
+                    val chip = child.getChildAt(j)
+                    if (chip is Chip && chip.isChecked) {
+                        interests.add(chip.text.toString())
+                    }
                 }
             }
         }
+
+        Log.d("DIRECT_FUNCTION", interests.joinToString(","))
         return interests.joinToString(",")
     }
 
+
     private fun pushToDb(interests: String){
-        val uid = SharedPrefManager.getUid()
+        Toast.makeText(applicationContext, "pushToDb: $interests", Toast.LENGTH_LONG).show()
+
+        val uid = auth.currentUser?.uid
+        Toast.makeText(applicationContext, "UID: ${uid.toString()}", Toast.LENGTH_SHORT).show()
+
         if(!uid.isNullOrEmpty()){
             val db = FirebaseDatabase.getInstance().getReference("Users")
             val data = mapOf(
-                "uid" to uid,
+                "name" to auth.currentUser?.displayName,
                 "interests" to interests
             )
             db.child(uid).setValue(data)
