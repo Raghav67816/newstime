@@ -160,6 +160,7 @@ class InterestActivity : AppCompatActivity() {
                 "interests" to interests
             )
             db.child(uid).setValue(data)
+            SharedPrefManager.saveInterests(interests)
         }
     }
 }

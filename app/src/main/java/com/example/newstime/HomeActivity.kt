@@ -1,6 +1,7 @@
 package com.example.newstime
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -12,7 +13,9 @@ import com.example.newstime.utils.SharedPrefManager
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -45,25 +48,11 @@ class HomeActivity : AppCompatActivity() {
         val interests = SharedPrefManager.getInterests()
 
         lifecycleScope.launch {
-//            if(interests != null){
-//                runOnUiThread {
-//                    Toast.makeText(applicationContext, interests.toString(), Toast.LENGTH_LONG).show()
-//                }
-//                val articles = fetcher.fetchArticles(interests.first())
-//                print(articles)
-//
-//                if(!articles.isEmpty()){
-//                    runOnUiThread {
-//                        Toast.makeText(applicationContext, "We bought ourselves here.", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//                else{
-//                    runOnUiThread {
-//                        Toast.makeText(applicationContext, "We didn't make it cooper.", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            }
-//        }
+            val results = withContext(Dispatchers.IO){
+                    val articles = fetcher.fetchArticles(interests.split(",").first())
+                    Log.d("ARTICLE_LEN", articles.count().toString())
+                }
+            }
         }
     }
 
@@ -72,7 +61,7 @@ class HomeActivity : AppCompatActivity() {
         val httpClient = OkHttpClient()
         val gson = Gson()
 
-        val url = "https://newsdata.io/api/1/news?apikey=${apiKey}"
+        val url = "https://newsdata.io/api/1/latest?apikey=${apiKey}"
 
         fun fetchArticles(category: String): List<NewsArticle> {
             val request = Request.Builder()
@@ -86,15 +75,15 @@ class HomeActivity : AppCompatActivity() {
                     val newsData = gson.fromJson(body, ApiResponse::class.java)
                     newsData.articles
                 } else {
+                    Log.d("RESP", response.code.toString())
                     emptyList()
                 }
             } catch (e: Exception) {
-                print(e.toString())
+                Log.e("A_ERROR", e.toString())
                 emptyList()
             }
         }
     }
-}
 
 data class ApiResponse(
     val status: Int,

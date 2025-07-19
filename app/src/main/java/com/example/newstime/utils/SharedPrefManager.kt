@@ -35,8 +35,8 @@ object SharedPrefManager {
         prefs.edit { putString(KEY_INTERESTS, interests) }
     }
 
-    fun getInterests(): String? {
-        return prefs.getString(KEY_INTERESTS, "")
+    fun getInterests(): String {
+        return prefs.getString(KEY_INTERESTS, "").toString()
     }
 
     fun saveUid(uid: String){
