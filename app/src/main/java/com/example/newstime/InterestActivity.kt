@@ -83,7 +83,7 @@ class InterestActivity : AppCompatActivity() {
     }
 
     suspend fun getInterests(): Pair<Int, String> = withContext(Dispatchers.IO){
-        val request = Request.Builder().url("https://01d1ffce6f66.ngrok-free.app/prefs").build()
+        val request = Request.Builder().url("https://7d618cb50480.ngrok-free.app/prefs").build()
         val response = httpClient.newCall(request).execute()
         val resData = response.body.string()
         response.close()

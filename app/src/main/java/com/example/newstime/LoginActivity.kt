@@ -1,8 +1,8 @@
 package com.example.newstime
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.newstime.utils.SharedPrefManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class LoginActivity : AppCompatActivity() {
 
@@ -90,8 +91,8 @@ class LoginActivity : AppCompatActivity() {
 
 
     private fun storeInfo(token: String){
-        val name = auth.currentUser?.displayName?:return
-        val email = auth.currentUser?.email?:return
+        val name = auth.currentUser?.displayName.toString()
+        val email = auth.currentUser?.email.toString()
 
         if (name.isEmpty() || email.isEmpty()){
             Toast.makeText(applicationContext, "Can't get name and email", Toast.LENGTH_SHORT).show()
@@ -104,6 +105,24 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun validateInterests() {}
+    private fun validateInterests() {
+        val db = FirebaseDatabase.getInstance()
+        db.getReference("Users/${auth.currentUser?.uid}/interests").get().addOnCompleteListener {
+            task ->
+            val interests = task.result?.toString()
+            if(interests.isNullOrEmpty()){
+                Log.d("LOGIN_FETCH", "Interests are either null or empty")
+            }
+            else{
+
+                SharedPrefManager.saveInterests(interests)
+                Log.d("LOGIN_FETCH", "Going to home")
+                val homeActivity = Intent(applicationContext, HomeActivity::class.java)
+                startActivity(homeActivity)
+
+            }
+        }
+
+    }
 
 }

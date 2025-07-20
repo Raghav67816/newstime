@@ -5,12 +5,14 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.newstime.utils.SharedPrefManager
-import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +41,7 @@ class HomeActivity : AppCompatActivity() {
 
         val logoutBtn = findViewById<Button>(R.id.logoutBtn)
         logoutBtn.setOnClickListener {
-            SharedPrefManager.clearUser()
+            onLogout(this)
         }
 
         val apiKey = "pub_94e0bc504a274c75aeaff2adb3badbfc"
@@ -54,7 +56,33 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
         }
+
+
+    private fun onLogout(context: Context){
+        val alert = AlertDialog.Builder(context)
+        alert.apply {
+            setTitle("Logout")
+            setMessage("Are you sure you want to logout ?")
+
+            setPositiveButton("Exit") { dialog, which ->
+                finishAffinity()
+            }
+
+            setNegativeButton("Logout & Exit"){
+                dialog, which ->
+                SharedPrefManager.clearUser()
+                finishAffinity()
+            }
+
+            setNeutralButton("Cancel"){
+                dialog, which -> dialog.dismiss()
+            }
+
+            val dialog = alert.create()
+            dialog.show()
+        }
     }
+}
 
 
     class NewsFetcher(apiKey: String) {
