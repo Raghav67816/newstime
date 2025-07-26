@@ -1,18 +1,16 @@
 package com.example.newstime
 
-import androidx.compose.runtime.Composable
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -45,6 +44,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+
 
 private lateinit var auth: FirebaseAuth
 
@@ -69,20 +69,25 @@ class HomeActivity : AppCompatActivity() {
             onLogout(this)
         }
 
-        val apiKey = "pub_94e0bc504a274c75aeaff2adb3badbfc"
-        val fetcher = NewsFetcher(apiKey)
+        val fetcher = NewsFetcher()
 
         val interests = SharedPrefManager.getInterests()
+        val container = findViewById<LinearLayout>(R.id.cardContainer)
 
         lifecycleScope.launch {
-            val results = withContext(Dispatchers.IO){
-                    val articles = fetcher.fetchArticles(interests.split(",").first())
-                    if(articles == null){
-                        Log.d("ARTICLE_TYPE", "articles is null")
-                    }
+            withContext(Dispatchers.IO){
+                val articles = fetcher.fetchArticles()
+                if(articles.isEmpty()) {
+                    Log.d("ARTICLE_TYPE", "articles is null")
+                }
+
+                else{
+//                        prepareArticlesView(articles)
+                    Log.d("ARTICLE_TYPE", "articles is not null")
                 }
             }
         }
+    }
 
 
     private fun onLogout(context: Context){
@@ -96,13 +101,13 @@ class HomeActivity : AppCompatActivity() {
             }
 
             setNegativeButton("Logout & Exit"){
-                dialog, which ->
+                    dialog, which ->
                 SharedPrefManager.clearUser()
                 finishAffinity()
             }
 
             setNeutralButton("Cancel"){
-                dialog, which -> dialog.dismiss()
+                    dialog, which -> dialog.dismiss()
             }
 
             val dialog = alert.create()
@@ -111,40 +116,38 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun prepareArticlesView(articles: List<NewsArticle>){
-
+        for(article in articles){
+            Log.d("ARTICLE_TAG", article.title)
+        }
     }
 }
 
 
-    class NewsFetcher(apiKey: String) {
-        val httpClient = OkHttpClient()
-        val gson = Gson()
+class NewsFetcher() {
+    val httpClient = OkHttpClient()
+    val gson = Gson()
 
-        val url = "https://newsdata.io/api/1/latest?apikey=${apiKey}"
+    val url = "https://e565b51f645a.ngrok-free.app/latest"
 
-        fun fetchArticles(category: String): List<NewsArticle> {
-            val request = Request.Builder()
-                .url(url)
-                .build()
+    fun fetchArticles(): Array<NewsArticle> {
+        val request = Request.Builder()
+            .url(url)
+            .build()
 
-            return try {
-                val response = httpClient.newCall(request).execute()
-                if (response.isSuccessful) {
-                    val body = response.body.string()
-                    val newsData_ = gson.fromJson(body, ApiResponse::class.java)
-                    Log.d("NEWS_DATA", newsData_.toString())
-                    val newsData = NewsArticle("Sample", "Link", "", "", "", listOf(""), "")
-                    return listOf(newsData)
-                } else {
-                    Log.d("RESP", response.code.toString())
-                    emptyList()
-                }
-            } catch (e: Exception) {
-                Log.e("A_ERROR", e.toString())
-                emptyList()
-            }
+        val response = httpClient.newCall(request).execute()
+        val bodyString = response.body.string()
+        Log.d("RESP_STR", bodyString)
+        var globalArticles: Array<NewsArticle> = emptyArray()
+
+        if(response.code == 200 && !bodyString.isEmpty()){
+            val articles = gson.fromJson(bodyString, Array<NewsArticle>::class.java)
+            globalArticles = articles
+            Log.d("FIRST_ARTICLE", globalArticles[0].toString())
         }
+
+        return globalArticles
     }
+}
 
 data class ApiResponse(
     val status: String,
@@ -158,12 +161,10 @@ data class NewsArticle(
     val pubDate: String,
     val sourceId: String,
     val creator: List<String>?,
-    val content: String?
 )
 
-@Preview
 @Composable
-fun ArticleCard(){
+fun ArticleCard(articleTitle: String, articleDesc: String, imageUrl: String, pubDate: String){
     Card(
         Modifier
             .fillMaxWidth()
@@ -174,7 +175,7 @@ fun ArticleCard(){
         Column(modifier = Modifier.padding(18.dp)) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://images.unsplash.com/photo-1579353977828-2a4eab540b9a?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")
+                    .data(imageUrl)
                     .crossfade(true)
                     .build(),
                 contentDescription = null,
@@ -186,7 +187,7 @@ fun ArticleCard(){
         }
 
         Text(
-            text = "Article Title",
+            text = articleTitle,
             style = MaterialTheme.typography.displayMedium,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
@@ -196,14 +197,14 @@ fun ArticleCard(){
 
         Column {
             Text(
-                text="Sample description",
+                text= articleDesc,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 3
             )
             Spacer(modifier = Modifier.width(8.dp).height(4.dp))
 
             Text(
-                text="Publish Date",
+                text = pubDate,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1
             )

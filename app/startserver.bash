@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /mnt/Sector16/newstime/api/ || exit
+cd /mnt/Sector16/newstime_k/app/api/ || exit
 source env/bin/activate
 
 uvicorn main:app --reload &
