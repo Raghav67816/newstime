@@ -1,0 +1,84 @@
+{
+    "World & Current Affairs": [
+        "International News",
+        "Politics",
+        "Government Policies",
+        "Elections",
+        "Conflicts & War",
+        "Diplomacy",
+        "Law & Justice",
+        "Human Rights"
+    ],
+    "Knowledge & Science": [
+        "Space",
+        "Physics",
+        "Biology",
+        "Chemistry",
+        "Environment",
+        "Climate Change",
+        "Research & Innovations"
+    ],
+    "Technology": [
+        "Artificial Intelligence",
+        "Cybersecurity",
+        "Blockchain & Crypto",
+        "Startups",
+        "Consumer Tech",
+        "Gadgets",
+        "Programming"
+    ],
+    "Economy & Business": [
+        "Stock Market",
+        "Economy",
+        "Finance",
+        "Banking",
+        "Trade",
+        "Real Estate",
+        "Corporates & Startups"
+    ],
+    "Lifestyle": [
+        "Health & Fitness",
+        "Mental Health",
+        "Fashion",
+        "Food & Nutrition",
+        "Travel",
+        "Relationships"
+    ],
+    "Entertainment & Culture": [
+        "Bollywood",
+        "Hollywood",
+        "Celebrities",
+        "Music",
+        "Art",
+        "Literature",
+        "Memes & Internet Culture"
+    ],
+    "Sports": [
+        "Cricket",
+        "Football",
+        "Olympics",
+        "Tennis",
+        "eSports",
+        "Other Sports"
+    ],
+    "Education": [
+        "School & Exams",
+        "Higher Education",
+        "EdTech",
+        "Scholarships",
+        "Career Guidance"
+    ],
+    "Innovations & Future": [
+        "Space Missions",
+        "Robotics",
+        "Quantum Computing",
+        "Sustainable Tech",
+        "Biotechnology"
+    ],
+    "Alerts & Local": [
+        "Weather Alerts",
+        "Natural Disasters",
+        "Local News",
+        "Traffic Updates"
+    ]
+}
