@@ -11,7 +11,7 @@ def load_tags():
     return data
 
 tags = load_tags()
-req_keys = ["article_id", "link", "creator", "description", "pubDate", "image_url", "source_name"]
+req_keys = ["article_id", "link", "creator", "description", "pubDate", "image_url", "source_name", "title"]
 
 app = FastAPI()
 
