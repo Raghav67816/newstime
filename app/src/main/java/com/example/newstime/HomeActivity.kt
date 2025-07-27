@@ -28,7 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import com.google.gson.annotations.SerializedName
 import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -117,7 +117,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun prepareArticlesView(articles: List<NewsArticle>){
         for(article in articles){
-            Log.d("ARTICLE_TAG", article.title)
+            Log.d("ARTICLE_TAG", article.articleId)
         }
     }
 }
@@ -127,7 +127,7 @@ class NewsFetcher() {
     val httpClient = OkHttpClient()
     val gson = Gson()
 
-    val url = "https://e565b51f645a.ngrok-free.app/latest"
+    val url = "https://966d376a3ec1.ngrok-free.app/latest"
 
     fun fetchArticles(): Array<NewsArticle> {
         val request = Request.Builder()
@@ -155,12 +155,16 @@ data class ApiResponse(
 )
 
 data class NewsArticle(
-    val title: String,
+    @SerializedName("article_id")
+    val articleId: String,
     val link: String,
-    val imageUrl: String?,
-    val pubDate: String,
-    val sourceId: String,
     val creator: List<String>?,
+    val description: String,
+    val pubDate: String,
+    @SerializedName("image_url")
+    val imageUrl: String?,
+    @SerializedName("source_name")
+    val sourceName: String
 )
 
 @Composable
