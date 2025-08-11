@@ -48,8 +48,11 @@ interface BookmarkDao {
     @Query("SELECT url FROM BookmarkMeta WHERE title LIKE '%' || :title || '%'")
     suspend fun getLinkByTitle(title: String): List<String>
 
-    @Query("DELETE FROM BookmarkMeta WHERE title LIKE '%' || :title || '%'")
-    suspend fun deleteByTitle(title: String)
+    @Query("DELETE FROM BookmarkMeta WHERE articleId LIKE '%' || :id_ || '%'")
+    suspend fun deleteById(id_: String)
+
+    @Query("SELECT * FROM BookmarkMeta WHERE articleId = :articleId LIMIT 1")
+    suspend fun getById(articleId: String): BookmarkMeta?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBookmark(bookmark: BookmarkMeta)

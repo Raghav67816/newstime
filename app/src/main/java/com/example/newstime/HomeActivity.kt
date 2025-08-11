@@ -6,14 +6,17 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -52,6 +55,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.internal.platform.PlatformRegistry
 import okhttp3.internal.platform.PlatformRegistry.applicationContext
 
 
@@ -78,6 +82,11 @@ class HomeActivity : AppCompatActivity() {
 
         val fetcher = NewsFetcher()
 
+        val menuBtn = findViewById<Button>(R.id.logoutBtn)
+        menuBtn.setOnClickListener {
+            onMenu(menuBtn)
+        }
+
         val composeView = findViewById<ComposeView>(R.id.composeView)
         composeView.setContent {
             PrepareArticlesView(articles = articlesState.value)
@@ -90,12 +99,31 @@ class HomeActivity : AppCompatActivity() {
             }
         }
     }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.accountMenu){
-            onLogout(applicationContext)
+
+    private fun onMenu(view: View) {
+        val menu = PopupMenu(view.context, view) // Use view.context instead of applicationContext
+        menu.menuInflater.inflate(R.menu.bottom_nav, menu.menu)
+
+        menu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.accountMenu -> {
+                    onLogout(this)
+                    true
+                }
+                R.id.homeMenu -> {
+                    // Handle "Search" click
+                    true
+                }
+                R.id.bookmarkMenu -> {
+                    val bookmarkPage = Intent(applicationContext, Bookmarks::class.java)
+                    startActivity(bookmarkPage)
+                    true
+                }
+                else -> false
+            }
         }
 
-        return true;
+        menu.show()
     }
 
 
@@ -213,7 +241,7 @@ fun ArticleCard(articleId: String, articleTitle: String, articleDesc: String?, i
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.clip(RectangleShape),
+                modifier = Modifier.clip(RectangleShape).fillMaxWidth(),
                 placeholder = painterResource(R.drawable.sample)
             )
             Spacer(modifier = Modifier.height(8.dp))

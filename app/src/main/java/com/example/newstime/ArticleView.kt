@@ -19,7 +19,7 @@ import com.example.newstime.utils.BookmarksManager
 import kotlinx.coroutines.launch
 
 class ArticleView : AppCompatActivity() {
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("SetJavaScriptEnabled", "SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -33,20 +33,35 @@ class ArticleView : AppCompatActivity() {
         val bundle = intent.extras
         val b_db = BookmarksManager.initDb(applicationContext)
 
+        val article_id = bundle?.getString("articleId").toString()
         val bookmarkBtn = findViewById<Button>(R.id.bookmarkBtn)
+
+        lifecycleScope.launch {
+            val output = b_db.bookmarkDao().getById(article_id)
+            if(output != null){
+                bookmarkBtn.text = "Remove Bookmark"
+            }
+        }
+
         bookmarkBtn.setOnClickListener {
             lifecycleScope.launch {
-                val bookmark = BookmarkMeta(
-                    bundle!!.getString("articleId").toString(),
-                    bundle.getString("title"),
-                    bundle.getString("url"),
-                    bundle.getString("date_published"),
-                    bundle.getString("imageUrl"),
-                    bundle.getString("desc"),
-                )
+                if(bookmarkBtn.text != "Remove Bookmark"){
+                    val bookmark = BookmarkMeta(
+                        bundle!!.getString("articleId").toString(),
+                        bundle.getString("title"),
+                        bundle.getString("url"),
+                        bundle.getString("date_published"),
+                        bundle.getString("imageUrl"),
+                        bundle.getString("desc"),
+                    )
 
-                b_db.bookmarkDao().insertBookmark(bookmark)
-                Log.d("DB", "article bookmarked")
+                    b_db.bookmarkDao().insertBookmark(bookmark)
+                    Log.d("DB", "article bookmarked")
+                }
+
+                else{
+                    b_db.bookmarkDao().deleteById(article_id)
+                }
             }
         }
 
