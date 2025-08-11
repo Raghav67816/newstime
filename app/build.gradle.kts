@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.appdistribution)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -43,6 +44,8 @@ android {
 }
 
 dependencies {
+    val room_version = "2.7.2"
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -79,4 +82,7 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.07.00"))
     implementation("io.coil-kt.coil3:coil-compose:3.2.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
+    implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
 }
+

@@ -2,8 +2,10 @@ package com.example.newstime
 
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -50,6 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.internal.platform.PlatformRegistry.applicationContext
 
 
 private lateinit var auth: FirebaseAuth
@@ -71,11 +74,7 @@ class HomeActivity : AppCompatActivity() {
         SharedPrefManager.init(applicationContext)
         Toast.makeText(applicationContext, "UID is ${auth.currentUser?.uid.toString()}", Toast.LENGTH_LONG).show()
 
-        val logoutBtn = findViewById<Button>(R.id.logoutBtn)
 
-        logoutBtn.setOnClickListener {
-            onLogout(this)
-        }
 
         val fetcher = NewsFetcher()
 
@@ -90,6 +89,13 @@ class HomeActivity : AppCompatActivity() {
                 articlesState.value = articles
             }
         }
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == R.id.accountMenu){
+            onLogout(applicationContext)
+        }
+
+        return true;
     }
 
 
@@ -123,10 +129,12 @@ class HomeActivity : AppCompatActivity() {
         LazyColumn {
             items(articles) { article ->
                 ArticleCard(
+                    article.articleId,
                     article.title,
                     article.description,
                     article.imageUrl,
-                    article.pubDate
+                    article.pubDate,
+                    article.link
                 )
             }
         }
@@ -138,7 +146,7 @@ class NewsFetcher() {
     val httpClient = OkHttpClient()
     val gson = Gson()
 
-    val url = "https://966d376a3ec1.ngrok-free.app/latest"
+    val url = "https://0c2b5619f446.ngrok-free.app/latest"
 
     fun fetchArticles(): List<NewsArticle> {
         val request = Request.Builder()
@@ -179,13 +187,20 @@ data class NewsArticle(
 )
 
 @Composable
-fun ArticleCard(articleTitle: String, articleDesc: String?, imageUrl: String?, pubDate: String){
+fun ArticleCard(articleId: String, articleTitle: String, articleDesc: String?, imageUrl: String?, pubDate: String, articleLink: String){
     Card(
         Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable{
-
+                val webView = Intent(applicationContext ,ArticleView::class.java)
+                webView.putExtra("url", articleLink)
+                webView.putExtra("articleId", articleId)
+                webView.putExtra("title", articleTitle)
+                webView.putExtra("imageUrl", imageUrl)
+                webView.putExtra("desc", articleDesc)
+                webView.setFlags(FLAG_ACTIVITY_NEW_TASK)
+                applicationContext?.startActivity(webView)
             },
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(12.dp)
