@@ -1,7 +1,8 @@
 package com.example.newstime
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,7 +13,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.newstime.ArticleCard
 import com.example.newstime.utils.BookmarksManager
 import kotlinx.coroutines.launch
 
@@ -31,6 +31,12 @@ class Bookmarks : AppCompatActivity() {
         }
 
         val bdb = BookmarksManager.initDb(this)
+        val homeBtn = findViewById<Button>(R.id.homeBtn)
+
+        homeBtn.setOnClickListener {
+            val homeActivity = Intent(this, HomeActivity::class.java)
+            startActivity(homeActivity)
+        }
 
         lifecycleScope.launch {
             val bookmarks = bdb.bookmarkDao().getAll()

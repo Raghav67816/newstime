@@ -1,6 +1,7 @@
 package com.example.newstime
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import com.example.newstime.utils.BookmarkMeta
@@ -35,6 +36,12 @@ class ArticleView : AppCompatActivity() {
 
         val article_id = bundle?.getString("articleId").toString()
         val bookmarkBtn = findViewById<Button>(R.id.bookmarkBtn)
+        val backBtn = findViewById<Button>(R.id.backBtn)
+
+        backBtn.setOnClickListener {
+            val homeIntent = Intent(this, HomeActivity::class.java)
+            startActivity(homeIntent)
+        }
 
         lifecycleScope.launch {
             val output = b_db.bookmarkDao().getById(article_id)
@@ -62,6 +69,14 @@ class ArticleView : AppCompatActivity() {
                 else{
                     b_db.bookmarkDao().deleteById(article_id)
                 }
+            }
+
+            if(bookmarkBtn.text != "Remove Bookmark"){
+                Toast.makeText(this, "Article Added To Bookmarks", Toast.LENGTH_SHORT).show()
+            }
+
+            else{
+                Toast.makeText(this, "Article Remove From Bookmarks", Toast.LENGTH_SHORT).show()
             }
         }
 
